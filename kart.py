@@ -30,53 +30,6 @@ folium.GeoJson(
         }
 ).add_to(m)
 
-class ClickHandler(folium.MacroElement):
-    def __init__(self):
-        super().__init__()
-        self._template = Template("""
-        {% macro script(this, kwargs) %}
-        
-        //карта
-        var map = {{this._parent.get_name()}};
-        
-        //клик
-        map.on('click', function(e) {
-            
-            //координаты
-            var lat = e.latlng.lat;
-            var lon = e.latlng.lng;
-
-            //отправка к main.py
-            fetch('/weather_by_coords', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    lat: lat,
-                    lon: lon
-                })
-            })
-            
-            //получение ответа
-            .then(resp => resp.json())
-            
-            .then(data => {
-                L.popup()
-                 .setLatLng(e.latlng)
-                 .setContent(
-                    "<b>" + data.city + "</b><br>" +
-                    " " + data.temp + "°C<br>" +
-                    data.descr
-                 )
-                 .openOn(map);
-            })
-            
-            //ошибка
-            .catch(err => {console.error("Ошибка:", err);});
-        });
-        {% endmacro %}
-        """)
 
 # координаты при клике
 m.add_child(folium.LatLngPopup())

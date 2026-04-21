@@ -4,7 +4,7 @@ import logging
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
-
+from pydantic import BaseModel
 from api import data_url
 
 # -------------------------
@@ -13,23 +13,9 @@ from api import data_url
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("main")
 
-# -------------------------
-# APP
-# -------------------------
 app = FastAPI()
 
-# -------------------------
-# STATIC (только если остались css/js)
-# -------------------------
-STATIC_DIR = "static"
-
-if os.path.exists(STATIC_DIR):
-    app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-
-
-# -------------------------
 # MAIN PAGE (world map)
-# -------------------------
 @app.get("/", response_class=HTMLResponse)
 async def main_page():
     try:
@@ -38,16 +24,11 @@ async def main_page():
     except FileNotFoundError:
         return HTMLResponse("<h1>world.html не найден</h1>", status_code=404)
 
-
-# -------------------------
-# 🌍 WEATHER API (координаты с карты)
-# -------------------------
-from pydantic import BaseModel
+#  WEATHER API (координаты с карты)
 
 class Coords(BaseModel):
     lat: float
     lon: float
-
 
 @app.post("/weather")
 async def weather(coords: Coords):
@@ -57,34 +38,6 @@ async def weather(coords: Coords):
         logger.exception("Ошибка погоды")
         return JSONResponse(status_code=500, content={"error": str(e)})
 
-
-# -------------------------
-# 📍 OLD API (если ещё нужны регионы)
-# -------------------------
-@app.get("/weather/{region_id}")
-async def weather_region(region_id: str):
-    try:
-        return data_url(region_id.lower().strip())
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
-
-
-# -------------------------
-# 🖼️ STATIC IMAGES (ОПЦИОНАЛЬНО)
-# -------------------------
-@app.get("/images/{filename}")
-async def get_image(filename: str):
-    path = os.path.join("imgs", filename)
-
-    if not os.path.exists(path):
-        raise HTTPException(status_code=404, detail="Файл не найден")
-
-    return FileResponse(path)
-
-
-# -------------------------
-# RUN
-# -------------------------
 if __name__ == "__main__":
     import uvicorn
 

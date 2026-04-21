@@ -137,7 +137,51 @@
                                     "<br>Longitude: " + e.latlng.lng.toFixed(4))
                         .openOn(map_21369263832aec879ed72adbf5b5913e);
                     }
-                map_21369263832aec879ed72adbf5b5913e.on('click', latLngPop);
+
             
+</script>
+<script>
+var map = map_21369263832aec879ed72adbf5b5913e;
+
+// убираем старый popup координат (если мешает)
+map.off('click');
+
+// новый обработчик
+map.on('click', function(e) {
+
+    let lat = e.latlng.lat;
+    let lon = e.latlng.lng;
+
+    fetch('/weather', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lat: lat, lon: lon })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.error) throw new Error(data.error);
+
+        L.popup()
+            .setLatLng(e.latlng)
+            .setContent(
+                "" + lat.toFixed(4) + ", " + lon.toFixed(4) + "<br><br>" +
+                "<b>" + data.city + "</b><br>" +
+                "" + data.temp + "°C<br>" +
+                data.descr
+            )
+            .openOn(map);
+
+    })
+    .catch(err => {
+        console.error(err);
+
+        L.popup()
+            .setLatLng(e.latlng)
+            .setContent("Ошибка получения погоды")
+            .openOn(map);
+    });
+
+});
 </script>
 </html>

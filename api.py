@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -8,19 +8,15 @@ from urllib3.util.retry import Retry
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("api")
 
-# 🔑 API ключ
-DEFAULT_KEY = "7216cf5ae90f43f5815d50ddcf378c4f"
-key = os.getenv("WEATHERBIT_KEY", DEFAULT_KEY)
+# OpenWeather API KEY
+DEFAULT_KEY = "92ff3999060421b6afef1bec8d98f3b9"
+key = os.getenv("OPENWEATHER_KEY", DEFAULT_KEY)
 
-url = "https://api.weatherbit.io/v2.0/current"
+# OpenWeather URL
+url = "https://api.openweathermap.org/data/2.5/weather"
 
-# 📍 (ОПЦИОНАЛЬНО) старые регионы — можно оставить или удалить
-coord: Dict[str, Tuple[float, float]] = {
-    "gom": (52.4338, 31.1923),
-    "minsk": (53.9000, 27.5667),
-}
 
-# 🔁 сессия с retry
+# retry сессия
 _session = requests.Session()
 _retries = Retry(
     total=3,
@@ -29,52 +25,39 @@ _retries = Retry(
 )
 _session.mount("https://", HTTPAdapter(max_retries=_retries))
 
+
 def get_weather_by_coords(lat: float, lon: float) -> dict:
-    """Получить погоду по координатам"""
+    """Запрос погоды по координатам"""
+    logger.info(f"REQUEST: lat={lat}, lon={lon}")
 
     params = {
         "lat": lat,
         "lon": lon,
-        "key": key,
+        "appid": key,        
+        "units": "metric",
         "lang": "ru",
-        "units": "M",
     }
 
-    try:
-        resp = _session.get(url, params=params, timeout=10)
-        resp.raise_for_status()
-        data = resp.json()
+    resp = _session.get(url, params=params, timeout=10)
 
-        item = data["data"][0]
+    logger.info(f"STATUS CODE: {resp.status_code}")
+    logger.info(f"RESPONSE: {resp.text}")
 
-        return {
-            "city": item.get("city_name", "Неизвестно"),
-            "temp": round(float(item.get("temp", 0))),
-            "descr": item.get("weather", {}).get("description", "-"),
-            "icon": item.get("weather", {}).get("icon", "")
-        }
+    resp.raise_for_status()
+    data = resp.json()
 
-    except Exception as e:
-        logger.exception("Ошибка API")
-        return {
-            "city": "Error",
-            "temp": 0,
-            "descr": str(e),
-            "icon": ""
-        }
+    weather = data["weather"][0]
+    main = data["main"]
+
+    return {
+        "city": data.get("name", "Unknown"),
+        "temp": round(main.get("temp", 0)),
+        "descr": weather.get("description", "-"),
+        "icon": weather.get("icon", "")
+    }
 
 
 def data_url(region_id: str) -> dict:
-    """Старый метод (region_id или 'lat,lon')"""
-
-    region_id = region_id.strip()
-
-    # 1. если это ключ (gom, minsk)
-    if region_id in coord:
-        lat, lon = coord[region_id]
-        return get_weather_by_coords(lat, lon)
-
-    # 2. если это "lat,lon"
     try:
         lat, lon = map(float, region_id.split(","))
         return get_weather_by_coords(lat, lon)
