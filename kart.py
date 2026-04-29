@@ -17,7 +17,8 @@ df = pd.DataFrame({
 m = folium.Map(
     location=[20, 0],
     zoom_start=2,
-    tiles='OpenStreetMap'
+    tiles='OpenStreetMap',
+    world_copy_jump=True
 )
 
 # стили
@@ -34,5 +35,5 @@ folium.GeoJson(
 # координаты при клике
 m.add_child(folium.LatLngPopup())
 
-m.save('world.html')
+m.save('world1.html')
 m
