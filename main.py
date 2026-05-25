@@ -1,20 +1,18 @@
 import os
 import logging
-
+from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from api import data_url
 
-# -------------------------
-# LOGGING
-# -------------------------
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("main")
 
-app = FastAPI()
-
+app = FastAPI(title="Weather Map API")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 # MAIN PAGE (world map)
 @app.get("/", response_class=HTMLResponse)
 async def main_page():

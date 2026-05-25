@@ -49,11 +49,29 @@ def get_weather_by_coords(lat: float, lon: float) -> dict:
     weather = data["weather"][0]
     main = data["main"]
 
+    wind = data.get("wind", {})
+    rain = data.get("rain", {})
+    clouds = data.get("clouds", {})
+
     return {
         "city": data.get("name", "Unknown"),
+
         "temp": round(main.get("temp", 0)),
+
         "descr": weather.get("description", "-"),
-        "icon": weather.get("icon", "")
+
+        "icon": weather.get("icon", ""),
+
+        # ветер
+        "wind_speed": wind.get("speed", 0),
+        "wind_deg": wind.get("deg", 0),
+        "wind_gust": wind.get("gust", 0),
+
+        # дождь
+        "rain_1h": rain.get("1h", 0),
+
+        # вероятность дождя (примерная)
+        "rain_probability": clouds.get("all", 0)
     }
 
 
@@ -66,5 +84,12 @@ def data_url(region_id: str) -> dict:
             "city": "Error",
             "temp": 0,
             "descr": "Неверные координаты",
-            "icon": ""
+            "icon": "",
+
+            "wind_speed": 0,
+            "wind_deg": 0,
+            "wind_gust": 0,
+
+            "rain_1h": 0,
+            "rain_probability": 0
         }

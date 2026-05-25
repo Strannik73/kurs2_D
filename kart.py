@@ -17,7 +17,8 @@ df = pd.DataFrame({
 m = folium.Map(
     location=[20, 0],
     zoom_start=2,
-    tiles='OpenStreetMap'
+    tiles='OpenStreetMap',
+    world_copy_jump=True
 )
 
 # стили

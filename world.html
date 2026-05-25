@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/static/style.css">
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -13,7 +14,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css"/>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css"/>
-    
+    <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/static/style.css"> -->
+
             <meta name="viewport" content="width=device-width,
                 initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
@@ -69,6 +72,7 @@
   "zoom": 2,
   "zoomControl": true,
   "preferCanvas": false,
+  "worldCopyJump": true,
 }
 
                 }
@@ -165,10 +169,55 @@ map.on('click', function(e) {
         L.popup()
             .setLatLng(e.latlng)
             .setContent(
-                "" + lat.toFixed(4) + ", " + lon.toFixed(4) + "<br><br>" +
-                "<b>" + data.city + "</b><br>" +
-                "" + data.temp + "°C<br>" +
-                data.descr
+                `
+                <div class="weather-popup">
+                    
+                    <div class="weather-title">
+                        ${data.city}
+                    </div>
+
+                    <div class="weather-coords">
+                        📍 ${lat.toFixed(4)}, ${lon.toFixed(4)}
+                    </div>
+
+                    <div class="weather-temp-box">
+
+                        <div class="weather-temp">
+                            ${data.temp}°C
+                        </div>
+
+                        <img
+                            class="weather-icon"
+                            src="https://openweathermap.org/img/wn/${data.icon}@2x.png"
+                        >
+
+                    </div>
+                    
+                    <div class="weather-desc">
+                        ${data.descr}
+                    </div>
+
+                    <div class="weather-details">
+
+                        <b>Ветер:</b>
+                        ${data.wind_speed} м/с<br>
+
+                        <b>Направление:</b>
+                        ${data.wind_deg}°<br>
+
+                        <b>Порывы:</b>
+                        ${data.wind_gust} м/с<br>
+
+                        <b>Осадки:</b>
+                        ${data.rain_1h} мм<br>
+
+                        <b>Вероятность дождя:</b>
+                        ${data.rain_probability}%<br>
+
+                    </div>
+
+                </div>
+                `
             )
             .openOn(map);
 
