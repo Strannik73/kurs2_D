@@ -203,4 +203,14 @@ window.addEventListener("load", function () {
 
 });
 </script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        const el = document.querySelector('.leaflet-bottom.leaflet-right');
+        if (el) el.remove();
+    }, 100); 
+});
+</script>
+
 </html>
