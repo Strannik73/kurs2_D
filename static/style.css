@@ -1,120 +1,156 @@
-.leaflet-bottom.leaflet-right {
-    display: none !important;
-}
-.weather-popup{
-    min-width:280px;
+.weather-popup {
+    min-width: 300px;
+    padding: 18px 18px 16px 18px;
+    border-radius: 22px;
 
-    padding:20px;
-    background:linear-gradient(160deg,#1e293b,#334155);
-    border-radius:24px;
-    color:white;
-    font-family:Arial, sans-serif;
-    box-shadow:0 10px 30px rgba(0,0,0,0.35);
-    overflow:hidden;
-}
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    color: white;
 
-.weather-title{
-    font-size:24px;
-    font-weight:700;
-    margin-bottom:6px;
-    color:white;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+
+    overflow: hidden;
+    position: relative;
 }
 
-.weather-coords{
-    font-size:12px;
-    color:#cbd5e1;
-    margin-bottom:18px;
+/* overlay затемнение для глубины */
+.weather-popup::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.15);
+    pointer-events: none;
 }
 
-.weather-temp-box{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:16px;
+/* ===== BACKGROUNDS ===== */
+.weather-popup.rain {
+    background: linear-gradient(145deg, #1e3a8a, #0f172a);
 }
 
-.weather-temp{
-    font-size:58px;
-    font-weight:700;
-    line-height:1;
-    color:white;
+.weather-popup.hot {
+    background: linear-gradient(145deg, #ff7a18, #af002d);
 }
 
-.weather-icon{
-    width:90px;
-    height:90px;
-    filter:drop-shadow(0 0 10px rgba(255,255,255,0.2));
+.weather-popup.cloudy {
+    background: linear-gradient(145deg, #475569, #1e293b);
 }
 
-
-.weather-desc{
-    font-size:15px;
-    text-transform:capitalize;
-    color:#e2e8f0;
-    background:rgba(255,255,255,0.08);
-    padding:10px 14px;
-    border-radius:14px;
-    margin-bottom:16px;
+.weather-popup.windy {
+    background: linear-gradient(145deg, #0f172a, #334155);
 }
 
-
-.weather-details{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
+.weather-popup.clear {
+    background: linear-gradient(145deg, #38bdf8, #0ea5e9);
 }
 
-.weather-details-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    background:rgba(255,255,255,0.08);
-    padding:10px 14px;
-    border-radius:14px;
-    font-size:14px;
+.weather-popup.cold {
+    background: linear-gradient(145deg, #2563eb, #0c4a6e);
 }
 
-.leaflet-popup-content-wrapper{
-    background:transparent !important;
-    border-radius:24px;
-    padding:0;
-    box-shadow:none !important;
+/* ===== TITLE ===== */
+.weather-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 0.3px;
 }
 
-.leaflet-popup-content{
-    margin:0 !important;
-    background:transparent !important;
+/* ===== COORDS ===== */
+.weather-coords {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 14px;
 }
 
-.leaflet-popup-tip{
-    background:#334155 !important;
+/* ===== TEMP BLOCK ===== */
+.weather-temp-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
 }
 
-.leaflet-popup-close-button{
-    color:white !important;
-    font-size:24px !important;
-    font-weight:bold;
-    top:12px !important;
-    right:12px !important;
-    width:28px !important;
-    height:28px !important;
-    display:flex !important;
-    align-items:center;
-    justify-content:center;
-    border-radius:50%;
-    background:rgba(255,255,255,0.12);
-    transition:0.2s;
+.weather-temp {
+    font-size: 54px;
+    font-weight: 700;
+    letter-spacing: -2px;
 }
 
-.leaflet-popup-close-button:hover{
-    background:rgba(255,255,255,0.22);
-    color:white !important;
+.weather-icon {
+    width: 86px;
+    height: 86px;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.35));
 }
 
-.leaflet-container a.leaflet-popup-close-button{
-    background:rgba(255,255,255,0.12);
+/* ===== DESCRIPTION ===== */
+.weather-desc {
+    font-size: 14px;
+    text-transform: capitalize;
+
+    padding: 10px 12px;
+    border-radius: 14px;
+
+    background: rgba(255,255,255,0.10);
+    backdrop-filter: blur(8px);
+
+    margin-bottom: 14px;
 }
 
-.leaflet-popup{
-    margin-bottom:20px;
+/* ===== DETAILS ===== */
+.weather-details {
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.weather-label {
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.12);
+    font-weight: 600;
+}
+
+/* ===== LEAFLET POPUP STYLE ===== */
+.leaflet-popup-content-wrapper {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border-radius: 22px !important;
+}
+
+.leaflet-popup-content {
+    margin: 0 !important;
+}
+
+.leaflet-popup-tip {
+    background: rgba(30, 41, 59, 0.9) !important;
+    backdrop-filter: blur(10px);
+}
+
+/* close button modern */
+.leaflet-popup-close-button {
+    color: white !important;
+    font-size: 20px !important;
+
+    top: 10px !important;
+    right: 10px !important;
+
+    width: 28px !important;
+    height: 28px !important;
+
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+
+    transition: 0.2s ease;
+}
+
+.leaflet-popup-close-button:hover {
+    background: rgba(255,255,255,0.25);
+    transform: scale(1.05);
 }

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<div class="weather-popup {{ data.weather_class }}">
+
+    <div class="weather-title">
+        {{ data.city }}
+    </div>
+
+    <div class="weather-temp-box">
+        <div class="weather-temp">
+            {{ data.temp }}°C
+        </div>
+
+        <img class="weather-icon"
+             src="https://openweathermap.org/img/wn/{{ data.icon }}@2x.png">
+    </div>
+
+    <div class="weather-desc">
+        {{ data.descr }}
+    </div>
+
+    <div class="weather-details">
+        <b>Индекс погоды:</b> {{ data.weather_score }}/100<br>
+        <b>Оценка:</b> {{ data.weather_label }}<br>
+        <br>
+
+        <b>Ветер:</b> {{ data.wind_speed }} м/с<br>
+        <b>Направление:</b> {{ data.wind_deg }}°<br>
+        <b>Порывы:</b> {{ data.wind_gust }} м/с<br>
+        <b>Осадки:</b> {{ data.rain_1h }} мм<br>
+        <b>Облачность:</b> {{ data.rain_probability }}%
+    </div>
+
+</div>
+</body>
+</html>

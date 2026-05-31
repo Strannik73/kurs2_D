@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from api import data_url
 
@@ -14,6 +15,21 @@ logger = logging.getLogger("main")
 app = FastAPI(title="Weather Map API")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 # MAIN PAGE (world map)
+
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/weather_popup", response_class=HTMLResponse)
+async def weather_popup(request: Request, lat: float, lon: float):
+    data = data_url(f"{lat},{lon}")
+    return templates.TemplateResponse(
+        "popup.html",
+        {
+            "request": request,
+            "coords": {"lat": lat, "lon": lon},
+            "data": data
+        }
+    )
+
 @app.get("/", response_class=HTMLResponse)
 async def main_page():
     try:

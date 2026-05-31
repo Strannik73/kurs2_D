@@ -25,7 +25,64 @@ _retries = Retry(
 )
 _session.mount("https://", HTTPAdapter(max_retries=_retries))
 
+# превращает данные погоды в число
+def weather_score(data: dict) -> int:
+    """Считает индекс погоды (0-100)"""
+    main = data["main"]
+    wind = data.get("wind", {})
+    clouds = data.get("clouds", {}).get("all", 0)
 
+    temp = main.get("temp", 0)
+    humidity = main.get("humidity", 0)
+    wind_speed = wind.get("speed", 0)
+
+    temp_score = max(0, 100 - abs(temp - 20) * 5)
+    score = (
+        temp_score * 0.4 +
+        (100 - humidity) * 0.2 +
+        (100 - clouds) * 0.2 +
+        (100 - wind_speed * 10) * 0.2
+    )
+    return round(max(0, min(100, score)))
+
+
+
+def weather_class(data: dict) -> str:
+    rain = data.get("rain", {}).get("1h", 0)
+    clouds = data.get("clouds", {}).get("all", 0)
+    temp = data["main"].get("temp", 0)
+    wind = data.get("wind", {}).get("speed", 0)
+
+    if rain > 0:
+        return "rain"
+    if wind > 8:
+        return "windy"
+    if clouds > 70:
+        return "cloudy"
+    if temp > 25:
+        return "hot"
+    if temp < 0:
+        return "cold"
+    return "clear"
+
+def weather_label(score: int) -> str:
+    if score >= 80:
+        return "Очень хорошая погода"
+    elif score >= 60:
+        return "Хорошая погода"
+    elif score >= 40:
+        return "Средняя погода"
+    else:
+        return "Плохая погода"
+    
+def humidity_label(humidity: int) -> str:
+    if humidity < 30:
+        return "Сухо"
+    elif humidity < 60:
+        return "Комфортно"
+    else:
+        return "Влажно"
+    
 def get_weather_by_coords(lat: float, lon: float) -> dict:
     """Запрос погоды по координатам"""
     logger.info(f"REQUEST: lat={lat}, lon={lon}")
@@ -33,7 +90,7 @@ def get_weather_by_coords(lat: float, lon: float) -> dict:
     params = {
         "lat": lat,
         "lon": lon,
-        "appid": key,        
+        "appid": key,
         "units": "metric",
         "lang": "ru",
     }
@@ -48,32 +105,29 @@ def get_weather_by_coords(lat: float, lon: float) -> dict:
 
     weather = data["weather"][0]
     main = data["main"]
-
     wind = data.get("wind", {})
     rain = data.get("rain", {})
     clouds = data.get("clouds", {})
-
-    return {
+    score = weather_score(data)
+    result = {
         "city": data.get("name", "Unknown"),
-
         "temp": round(main.get("temp", 0)),
-
         "descr": weather.get("description", "-"),
-
         "icon": weather.get("icon", ""),
-
-        # ветер
         "wind_speed": wind.get("speed", 0),
         "wind_deg": wind.get("deg", 0),
         "wind_gust": wind.get("gust", 0),
-
-        # дождь
         "rain_1h": rain.get("1h", 0),
-
-        # вероятность дождя (примерная)
-        "rain_probability": clouds.get("all", 0)
+        "rain_probability": clouds.get("all", 0),
+        "weather_score": score,
+        "weather_label": weather_label(score)
     }
 
+    # Добавляем индекс погоды и класс
+    result["weather_score"] = weather_score(data)
+    result["weather_class"] = weather_class(data)
+
+    return result
 
 def data_url(region_id: str) -> dict:
     try:
@@ -93,3 +147,4 @@ def data_url(region_id: str) -> dict:
             "rain_1h": 0,
             "rain_probability": 0
         }
+

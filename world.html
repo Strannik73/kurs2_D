@@ -143,91 +143,62 @@
 
             
 </script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 <script>
-var map = map_21369263832aec879ed72adbf5b5913e;
+window.addEventListener("load", function () {
 
-// убираем старый popup координат (если мешает)
-map.off('click');
+    // Берём карту, которая уже создана Folium/Leaflet
+    var map = window["map_21369263832aec879ed72adbf5b5913e"];
 
-// новый обработчик
-map.on('click', function(e) {
+    if (!map) {
+        console.error("Карта не найдена");
+        return;
+    }
 
-    let lat = e.latlng.lat;
-    let lon = e.latlng.lng;
+    // Снимаем старые обработчики клика (если есть)
+    map.off('click');
 
-    fetch('/weather', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lat: lat, lon: lon })
-    })
-    .then(res => res.json())
-    .then(data => {
+    // Обработчик клика по карте
+    map.on('click', function (e) {
 
-        if (data.error) throw new Error(data.error);
+        let lat = e.latlng.lat;
+        let lon = e.latlng.lng;
 
-        L.popup()
+        // Показываем временный popup "Загрузка..."
+        let loadingPopup = L.popup()
             .setLatLng(e.latlng)
-            .setContent(
-                `
-                <div class="weather-popup">
-                    
-                    <div class="weather-title">
-                        ${data.city}
-                    </div>
-
-                    <div class="weather-coords">
-                         ${lat.toFixed(4)}, ${lon.toFixed(4)}
-                    </div>
-
-                    <div class="weather-temp-box">
-
-                        <div class="weather-temp">
-                            ${data.temp}°C
-                        </div>
-
-                        <img
-                            class="weather-icon"
-                            src="https://openweathermap.org/img/wn/${data.icon}@2x.png"
-                        >
-
-                    </div>
-                    
-                    <div class="weather-desc">
-                        ${data.descr}
-                    </div>
-
-                    <div class="weather-details">
-
-                        <b>Ветер:</b>
-                        ${data.wind_speed} м/с<br>
-
-                        <b>Направление:</b>
-                        ${data.wind_deg}°<br>
-
-                        <b>Порывы:</b>
-                        ${data.wind_gust} м/с<br>
-
-                        <b>Осадки:</b>
-                        ${data.rain_1h} мм<br>
-
-                        <b>Вероятность дождя:</b>
-                        ${data.rain_probability}%<br>
-
-                    </div>
-
-                </div>
-                `
-            )
+            .setContent("<div class='weather-popup'>Загрузка погоды...</div>")
             .openOn(map);
 
-    })
-    .catch(err => {
-        console.error(err);
+        // Запрос к серверу, который возвращает HTML для popup
+        fetch(`/weather_popup?lat=${lat}&lon=${lon}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Ошибка сервера");
+                return res.text();
+            })
+            .then(html => {
+                // Закрываем временный popup
+                map.closePopup(loadingPopup);
 
-        L.popup()
-            .setLatLng(e.latlng)
-            .setContent("Ошибка получения погоды")
-            .openOn(map);
+                // Открываем popup с серверным HTML
+                L.popup()
+                    .setLatLng(e.latlng)
+                    .setContent(html)
+                    .openOn(map);
+            })
+            .catch(err => {
+                console.error(err);
+
+                // Закрываем временный popup
+                map.closePopup(loadingPopup);
+
+                // Показываем ошибку
+                L.popup()
+                    .setLatLng(e.latlng)
+                    .setContent("<div class='weather-popup'>Ошибка получения погоды</div>")
+                    .openOn(map);
+            });
+
     });
 
 });
