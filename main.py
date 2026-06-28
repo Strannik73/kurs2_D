@@ -1,6 +1,10 @@
 import io
 import os
 import logging
+import ssl
+import sys
+import threading
+import webbrowser
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
@@ -8,26 +12,24 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from api import data_url
-from PIL import Image, ImageDraw, ImageFont
+from crt import generate_key_and_cert
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("main")
 
+def resource_path(path):
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, path)
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 app = FastAPI(title="Weather Map API")
-app.mount("/static", StaticFiles(directory="static"), name="static")
-# MAIN PAGE (world map)
-
-
+app.mount("/static",StaticFiles(directory=os.path.join(BASE_DIR, "static")),name="static")
+templates = Jinja2Templates(directory=resource_path("templates"))
 
 @app.get("/", response_class=HTMLResponse)
-async def main_page():
-    try:
-        with open("templates/world.html", "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
-    except FileNotFoundError:
-        return HTMLResponse("<h1>world.html не найден</h1>", status_code=404)
-
-#  WEATHER API (координаты с карты)
+async def main_page(request: Request):
+    return templates.TemplateResponse("world.html", {"request": request})
 
 class Coords(BaseModel):
     lat: float
@@ -41,25 +43,45 @@ async def weather(coords: Coords):
         logger.exception("Ошибка погоды")
         return JSONResponse(status_code=500, content={"error": str(e)})
 
-templates = Jinja2Templates(directory="templates")
 
 @app.get("/weather_popup", response_class=HTMLResponse)
 async def weather_popup(request: Request, lat: float, lon: float):
-    data = data_url(f"{lat},{lon}")
-    return templates.TemplateResponse(
-        "popup.html",
-        {
-            "request": request,
-            "coords": {"lat": lat, "lon": lon},
-            "data": data
-        }
+    try:
+        data = data_url(f"{lat},{lon}")
+
+        return templates.TemplateResponse(
+            "popup.html",
+            {
+                "request": request,
+                "coords": {"lat": lat, "lon": lon},
+                "data": data
+            }
+        )
+    except Exception as e:
+        logger.exception("Popup error")
+        return HTMLResponse(f"<div>Ошибка: {e}</div>", status_code=500)
+    
+def open_browser():
+    webbrowser.open("https://127.0.0.1:8000")
+
+
+def run_server():
+    import uvicorn
+
+    uvicorn.run(
+        app,
+        host="127.0.0.1",
+        port=8000,
+        log_level="info",
+        ssl_keyfile="key.pem",
+        ssl_certfile="cert.pem"
     )
     
 if __name__ == "__main__":
-    import uvicorn
+    if not os.path.exists("cert.pem") or not os.path.exists("key.pem"):
+        generate_key_and_cert()
 
-    host = os.environ.get("HOST", "127.0.0.1")
-    port = int(os.environ.get("PORT", 8000))
 
-    logger.info(f"Запуск на {host}:{port}")
-    uvicorn.run("main:app", host=host, port=port, reload=True)
+    threading.Timer(1.2, open_browser).start()
+
+    run_server()

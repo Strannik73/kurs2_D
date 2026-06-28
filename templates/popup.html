@@ -6,7 +6,7 @@
     <title>КАРТА</title>
 </head>
 <body>
-<div class="weather-popup {{ data.weather_class }}">
+<div class="weather-popup {{ data.weather_class or 'clear' }}">
 
     <div class="weather-title">
         {{ data.city }}

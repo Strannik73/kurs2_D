@@ -15,7 +15,6 @@
     position: relative;
 }
 
-/* overlay затемнение для глубины */
 .weather-popup::before {
     content: "";
     position: absolute;
@@ -24,7 +23,6 @@
     pointer-events: none;
 }
 
-/* ===== BACKGROUNDS ===== */
 .weather-popup.rain {
     background: linear-gradient(145deg, #1e3a8a, #0f172a);
 }
@@ -49,7 +47,6 @@
     background: linear-gradient(145deg, #2563eb, #0c4a6e);
 }
 
-/* ===== TITLE ===== */
 .weather-title {
     font-size: 20px;
     font-weight: 700;
@@ -57,14 +54,12 @@
     letter-spacing: 0.3px;
 }
 
-/* ===== COORDS ===== */
 .weather-coords {
     font-size: 11px;
     color: rgba(255,255,255,0.7);
     margin-bottom: 14px;
 }
 
-/* ===== TEMP BLOCK ===== */
 .weather-temp-box {
     display: flex;
     align-items: center;
@@ -84,7 +79,6 @@
     filter: drop-shadow(0 10px 20px rgba(0,0,0,0.35));
 }
 
-/* ===== DESCRIPTION ===== */
 .weather-desc {
     font-size: 14px;
     text-transform: capitalize;
@@ -98,7 +92,6 @@
     margin-bottom: 14px;
 }
 
-/* ===== DETAILS ===== */
 .weather-details {
     margin-top: 10px;
     font-size: 13px;
@@ -112,7 +105,6 @@
     font-weight: 600;
 }
 
-/* ===== LEAFLET POPUP STYLE ===== */
 .leaflet-popup-content-wrapper {
     background: transparent !important;
     box-shadow: none !important;
@@ -129,7 +121,6 @@
     backdrop-filter: blur(10px);
 }
 
-/* close button modern */
 .leaflet-popup-close-button {
     color: white !important;
     font-size: 20px !important;
@@ -161,7 +152,6 @@
     box-shadow: none !important;
 }
 
-/* Общий стиль кнопок + и - */
 .leaflet-control-zoom a {
     width: 42px !important;
     height: 42px !important;
@@ -169,7 +159,7 @@
     line-height: 42px !important;
     text-align: center !important;
 
-    background: rgba(30, 41, 59, 0.75) !important; /* тёмный glass */
+    background: rgba(30, 41, 59, 0.75) !important; 
     color: #ffffff !important;
 
     border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -186,24 +176,20 @@
     transition: all 0.2s ease;
 }
 
-/* Hover эффект */
 .leaflet-control-zoom a:hover {
     background: rgba(56, 189, 248, 0.25) !important;
     transform: translateY(-2px);
     box-shadow: 0 12px 25px rgba(0, 0, 0, 0.35) !important;
 }
 
-/* Active (нажатие) */
 .leaflet-control-zoom a:active {
     transform: scale(0.95);
 }
 
-/* Убираем стандартные рамки фокуса */
 .leaflet-control-zoom a:focus {
     outline: none !important;
 }
 
-/* Разделение кнопок */
 .leaflet-control-zoom a:first-child {
     border-radius: 12px 12px 8px 8px !important;
 }

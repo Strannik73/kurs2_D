@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="/static/style.css">
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
@@ -147,7 +146,6 @@
 <script>
 window.addEventListener("load", function () {
 
-    // Берём карту, которая уже создана Folium/Leaflet
     var map = window["map_21369263832aec879ed72adbf5b5913e"];
 
     if (!map) {
@@ -155,32 +153,31 @@ window.addEventListener("load", function () {
         return;
     }
 
-    // Снимаем старые обработчики клика (если есть)
     map.off('click');
 
-    // Обработчик клика по карте
     map.on('click', function (e) {
 
         let lat = e.latlng.lat;
         let lon = e.latlng.lng;
 
-        // Показываем временный popup "Загрузка..."
         let loadingPopup = L.popup()
             .setLatLng(e.latlng)
             .setContent("<div class='weather-popup'>Загрузка погоды...</div>")
             .openOn(map);
 
-        // Запрос к серверу, который возвращает HTML для popup
         fetch(`/weather_popup?lat=${lat}&lon=${lon}`)
             .then(res => {
-                if (!res.ok) throw new Error("Ошибка сервера");
+                if (!res.ok) throw new Error("HTTP error");
                 return res.text();
             })
             .then(html => {
-                // Закрываем временный popup
+
+                if (!html.includes("weather-popup")) {
+                    throw new Error("Bad HTML response");
+                }
+
                 map.closePopup(loadingPopup);
 
-                // Открываем popup с серверным HTML
                 L.popup()
                     .setLatLng(e.latlng)
                     .setContent(html)
@@ -189,13 +186,11 @@ window.addEventListener("load", function () {
             .catch(err => {
                 console.error(err);
 
-                // Закрываем временный popup
                 map.closePopup(loadingPopup);
 
-                // Показываем ошибку
                 L.popup()
                     .setLatLng(e.latlng)
-                    .setContent("<div class='weather-popup'>Ошибка получения погоды</div>")
+                    .setContent("Ошибка загрузки погоды")
                     .openOn(map);
             });
 

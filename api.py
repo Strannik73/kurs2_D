@@ -8,15 +8,12 @@ from urllib3.util.retry import Retry
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("api")
 
-# OpenWeather API KEY
 DEFAULT_KEY = "92ff3999060421b6afef1bec8d98f3b9"
 key = os.getenv("OPENWEATHER_KEY", DEFAULT_KEY)
 
-# OpenWeather URL
 url = "https://api.openweathermap.org/data/2.5/weather"
 
 
-# retry сессия
 _session = requests.Session()
 _retries = Retry(
     total=3,
@@ -25,9 +22,7 @@ _retries = Retry(
 )
 _session.mount("https://", HTTPAdapter(max_retries=_retries))
 
-# превращает данные погоды в число
 def weather_score(data: dict) -> int:
-    """Считает индекс погоды (0-100)"""
     main = data["main"]
     wind = data.get("wind", {})
     clouds = data.get("clouds", {}).get("all", 0)
@@ -44,7 +39,6 @@ def weather_score(data: dict) -> int:
         (100 - wind_speed * 10) * 0.2
     )
     return round(max(0, min(100, score)))
-
 
 
 def weather_class(data: dict) -> str:
@@ -83,8 +77,7 @@ def humidity_label(humidity: int) -> str:
     else:
         return "Влажно"
     
-def get_weather_by_coords(lat: float, lon: float) -> dict:
-    """Запрос погоды по координатам"""
+def weather_coords(lat: float, lon: float) -> dict:
     logger.info(f"REQUEST: lat={lat}, lon={lon}")
 
     params = {
@@ -123,7 +116,6 @@ def get_weather_by_coords(lat: float, lon: float) -> dict:
         "weather_label": weather_label(score)
     }
 
-    # Добавляем индекс погоды и класс
     result["weather_score"] = weather_score(data)
     result["weather_class"] = weather_class(data)
 
@@ -132,7 +124,7 @@ def get_weather_by_coords(lat: float, lon: float) -> dict:
 def data_url(region_id: str) -> dict:
     try:
         lat, lon = map(float, region_id.split(","))
-        return get_weather_by_coords(lat, lon)
+        return weather_coords(lat, lon)
     except Exception:
         return {
             "city": "Error",
