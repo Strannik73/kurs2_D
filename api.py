@@ -139,4 +139,3 @@ def data_url(region_id: str) -> dict:
             "rain_1h": 0,
             "rain_probability": 0
         }
-
